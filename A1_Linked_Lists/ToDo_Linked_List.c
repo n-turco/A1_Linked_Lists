@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <errno.h>
 
 #define MAX_TITLE 20 
 #define MAX_DESCRIPTION 50
@@ -14,7 +16,7 @@ struct ToDo {
 struct ToDo* AddToDo(struct ToDo* head, int ToDoId, char Title[], char Description[]);
 struct ToDo* FindToDoByIndex(struct ToDo* head, int ToDoId);
 struct ToDo* DeleteToDoByToDoId(struct ToDo* head, int ToDoId);
-struct ToDo* PrintToDos(struct ToDo* head);
+void PrintToDos(struct ToDo* head);
 void FreeToDoList(struct ToDo* head);
 
 
@@ -24,6 +26,7 @@ int main(void) {
 	int toDoId = 0;
 	char toDoTitle[MAX_TITLE] = { 0 };
 	char toDoDescription[MAX_DESCRIPTION] = { 0 };
+	
 	while (1) {
 		printf("\nMENU\n");
 		printf("Select an option\n");
@@ -42,11 +45,15 @@ int main(void) {
 			scanf_s("%d", &toDoId);
 			while ((getchar()) != '\n');
 			printf("Enter Title: ");
-			scanf_s("%[^\n]19s", &toDoTitle, MAX_TITLE);
+			fgets(toDoTitle, MAX_TITLE, stdin);
+			toDoTitle[strcspn(toDoTitle, "\n")] = 0;
+			//scanf_s(" %[^\n]19s", &toDoTitle, MAX_TITLE);
 			printf("Enter Description: ");
-			scanf_s("%[^\n]49s", &toDoDescription, MAX_DESCRIPTION);
+			fgets(toDoDescription, MAX_DESCRIPTION, stdin);
+			toDoDescription[strcspn(toDoDescription, "\n")] = 0;
+			//scanf_s(" %[^\n]49s", &toDoDescription, MAX_DESCRIPTION);
 
-			AddToDo(ToDoListHead, toDoId, toDoTitle, toDoDescription);
+			ToDoListHead = AddToDo(ToDoListHead, toDoId, toDoTitle, toDoDescription);
 			break;
 		case 2:
 			FindToDoByIndex(ToDoListHead, toDoId);
@@ -64,9 +71,7 @@ int main(void) {
 		default:
 			printf("Please select a valid option");
 		}
-
 	}
-
 	return 0;
 }
 
@@ -79,8 +84,17 @@ struct ToDo* AddToDo(struct ToDo* head, int ToDoId, char Title[], char Descripti
 	}
 
 	NewItem->ToDoId = ToDoId;
-	NewItem->Title[MAX_TITLE - 1] = Title;
-	NewItem->Description[MAX_DESCRIPTION - 1] = Description;
+	   
+	if (strcpy_s(NewItem->Title, MAX_TITLE, Title) != 0) {
+		printf("Error copying title.\n");
+		free(NewItem);
+		return head;
+	}
+	if (strcpy_s(NewItem->Description, MAX_DESCRIPTION, Description) != 0) {
+		printf("Error copying description.\n");
+		free(NewItem);
+		return head;
+	}
 	NewItem->NextToDo = NULL;
 	printf("Successfully added item.\n");
 	return NewItem;
@@ -91,8 +105,12 @@ struct ToDo* FindToDoByIndex(struct ToDo* head, int ToDoId) {
 struct ToDo* DeleteToDoByToDoId(struct ToDo* head, int ToDoId) {
 
 }
-struct ToDo* PrintToDos(struct ToDo* head) {
-
+void PrintToDos(struct ToDo* head) {
+	struct ToDo* currentToDo = head;
+	while (currentToDo != NULL) {
+		printf("%d %s\n%s", currentToDo->ToDoId, currentToDo->Title, currentToDo->Description);
+		currentToDo = currentToDo->NextToDo;
+	}
 }
 void FreeToDoList(struct ToDo* head) {
 
