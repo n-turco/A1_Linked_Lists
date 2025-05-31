@@ -14,7 +14,7 @@ struct ToDo {
 };
 
 struct ToDo* AddToDo(struct ToDo* head, int ToDoId, char Title[], char Description[]);
-struct ToDo* FindToDoByIndex(struct ToDo* head, int ToDoId);
+void FindToDoByIndex(struct ToDo* head);
 struct ToDo* DeleteToDoByToDoId(struct ToDo* head, int ToDoId);
 void PrintToDos(struct ToDo* head);
 void FreeToDoList(struct ToDo* head);
@@ -47,19 +47,17 @@ int main(void) {
 			printf("Enter Title: ");
 			fgets(toDoTitle, MAX_TITLE, stdin);
 			toDoTitle[strcspn(toDoTitle, "\n")] = 0;
-			//scanf_s(" %[^\n]19s", &toDoTitle, MAX_TITLE);
 			printf("Enter Description: ");
 			fgets(toDoDescription, MAX_DESCRIPTION, stdin);
 			toDoDescription[strcspn(toDoDescription, "\n")] = 0;
-			//scanf_s(" %[^\n]49s", &toDoDescription, MAX_DESCRIPTION);
 
 			ToDoListHead = AddToDo(ToDoListHead, toDoId, toDoTitle, toDoDescription);
 			break;
 		case 2:
-			FindToDoByIndex(ToDoListHead, toDoId);
+			DeleteToDoByToDoId(ToDoListHead, toDoId);
 			break;
 		case 3:
-			DeleteToDoByToDoId(ToDoListHead, toDoId);
+			FindToDoByIndex(ToDoListHead);		
 			break;
 		case 4:
 			PrintToDos(ToDoListHead);
@@ -95,27 +93,46 @@ struct ToDo* AddToDo(struct ToDo* head, int ToDoId, char Title[], char Descripti
 		free(NewItem);
 		return head;
 	}
-	NewItem->NextToDo = NULL;
+	NewItem->NextToDo = head;
 	printf("Successfully added item.\n");
 	return NewItem;
 }
-struct ToDo* FindToDoByIndex(struct ToDo* head, int ToDoId) {
-
+void FindToDoByIndex(struct ToDo* head) {
+	int id = 0;
+	struct ToDo* current = head;
+	printf("Enter the To Do ID: ");
+	scanf_s("%d", &id);
+	while ((getchar()) != '\n');
+	while (current != NULL) {
+		if (current->ToDoId == id) {
+			printf("Match Found for ID number %d\n", id);
+			printf("------------------------\n");
+			printf("%d %s %s", current->ToDoId, current->Title, current->Description);
+			printf("------------------------\n");
+			return;
+		}
+		current = current->NextToDo;
+	}	
+	printf("No match found.\n");
 }
 struct ToDo* DeleteToDoByToDoId(struct ToDo* head, int ToDoId) {
 
 }
 void PrintToDos(struct ToDo* head) {
 	struct ToDo* currentToDo = head;
+
+	printf("To Do List\n");
+	printf("-----------------------\n");
 	while (currentToDo != NULL) {
-		printf("%d %s\n%s", currentToDo->ToDoId, currentToDo->Title, currentToDo->Description);
+		printf("-----------------------\n");
+		printf("ID: %d\nTitle: %s\nDescription: %s\n", currentToDo->ToDoId, currentToDo->Title, currentToDo->Description);
 		currentToDo = currentToDo->NextToDo;
 	}
 }
 void FreeToDoList(struct ToDo* head) {
 
 	struct ToDo* current = head;
-	struct ToDo* tempNode;
+	struct ToDo* tempNode = NULL;
 
 	while (current != NULL) {
 		tempNode = current->NextToDo;
